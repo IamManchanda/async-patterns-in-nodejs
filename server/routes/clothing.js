@@ -4,32 +4,30 @@ const datafile = "server/data/clothing.json";
 const router = express.Router();
 
 /* GET all clothing */
-const fetchClothingData = () => {
-  return new Promise(function handlePromise(resolve, reject) {
-    fs.readFile(datafile, "utf8", function handleFetching(err, data) {
-      if (err) {
-        reject(err);
-      } else {
-        const clothingData = JSON.parse(data);
-        resolve(clothingData);
-      }
-    });
-  });
+const fetchClothingData = async () => {
+  try {
+    const rawData = await fs.promises.readFile(datafile, "utf8");
+    const clothingData = JSON.parse(rawData);
+    console.log(clothingData);
+    return clothingData;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 router.route("/").get(function handleClothingRoute(req, res) {
-  fetchClothingData()
-    .then(function handleSuccess(data) {
+  (async function handleFetching() {
+    try {
+      const data = await fetchClothingData();
       console.log("Success Returning clothing data.");
       res.send(data);
-    })
-    .catch(function handleError(err) {
+    } catch (error) {
       console.log("Error Returning clothing data.");
-      res.status(500).send(err);
-    })
-    .finally(function handleFinally() {
+      res.status(500).send(error);
+    } finally {
       console.log("All done processing Promises.");
-    });
+    }
+  })();
   console.log("Doing more work.");
 });
 
